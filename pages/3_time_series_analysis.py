@@ -26,6 +26,7 @@ def time_series_analysis():
     
     st.subheader("時系列プロット")
     fig, ax = plt.subplots()
+    plt.rcParams['font.family'] = 'IPAexGothic'
     ax.plot(series)
     ax.set_title(f"{value_column}の時系列プロット")
     st.pyplot(fig)
