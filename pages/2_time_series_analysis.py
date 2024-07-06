@@ -1,4 +1,4 @@
-# pages/time_series_analysis.py
+# pages/2_time_series_analysis.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,13 +7,11 @@ from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-def time_series_analysis():
-    st.title("時系列分析")
-    
-    if 'preprocessed_data' not in st.session_state:
-        st.warning("まずデータの前処理を行ってください。")
-        return
-    
+st.title("時系列分析")
+
+if 'preprocessed_data' not in st.session_state:
+    st.warning("まずデータの前処理を行ってください。")
+else:
     df = st.session_state['preprocessed_data'].copy()
     
     # 時系列データの選択
@@ -26,7 +24,6 @@ def time_series_analysis():
     
     st.subheader("時系列プロット")
     fig, ax = plt.subplots()
-    plt.rcParams['font.family'] = 'IPAexGothic'
     ax.plot(series)
     ax.set_title(f"{value_column}の時系列プロット")
     st.pyplot(fig)
@@ -50,5 +47,5 @@ def time_series_analysis():
     fig = decomposition.plot()
     st.pyplot(fig)
 
-if __name__ == "__main__":
-    time_series_analysis()
+    st.session_state['analyzed_data'] = df
+    st.success("時系列分析が完了しました。")

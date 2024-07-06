@@ -1,16 +1,14 @@
-# pages/prediction.py
+# pages/4_prediction.py
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from prophet import Prophet
 
-def prediction():
-    st.title("予測")
-    
-    if 'model' not in st.session_state:
-        st.warning("まずモデリングを行ってください。")
-        return
-    
+st.title("予測")
+
+if 'model' not in st.session_state:
+    st.warning("まずモデリングを行ってください。")
+else:
     model = st.session_state['model']
     model_type = st.session_state['model_type']
     
@@ -68,5 +66,4 @@ def prediction():
         mime="text/csv",
     )
 
-if __name__ == "__main__":
-    prediction()
+    st.success("予測が完了しました。")

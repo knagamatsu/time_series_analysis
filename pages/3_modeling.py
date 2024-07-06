@@ -1,4 +1,4 @@
-# pages/modeling.py
+# pages/3_modeling.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,21 +6,17 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from prophet import Prophet
 
-def modeling():
-    st.title("モデリング")
-    
-    if 'preprocessed_data' not in st.session_state:
-        st.warning("まずデータの前処理を行ってください。")
-        return
-    
-    df = st.session_state['preprocessed_data'].copy()
+st.title("モデリング")
+
+if 'analyzed_data' not in st.session_state:
+    st.warning("まず時系列分析を行ってください。")
+else:
+    df = st.session_state['analyzed_data'].copy()
     
     # 時系列データの選択
-    time_column = st.selectbox("時間列を選択", df.columns)
+    time_column = df.index.name
+    st.write(f'時間列: {time_column}')
     value_column = st.selectbox("予測する列を選択", df.columns)
-    
-    df[time_column] = pd.to_datetime(df[time_column])
-    df = df.set_index(time_column)
     series = df[value_column]
     
     # モデル選択
@@ -57,9 +53,6 @@ def modeling():
     
     if model_type in ["ARIMA", "SARIMA"]:
         st.subheader("モデルサマリー")
-        st.write(results.summary())
+        st.text(results.summary())
     
     st.success("モデルの学習が完了しました。")
-
-if __name__ == "__main__":
-    modeling()

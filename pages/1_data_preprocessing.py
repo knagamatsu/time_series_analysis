@@ -1,18 +1,16 @@
-# pages/data_preprocessing.py
+# pages/1_data_preprocessing.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-def preprocess_data():
-    st.title("データ前処理")
-    
-    if 'data' not in st.session_state:
-        st.warning("まずデータを読み込んでください。")
-        return
-    
+st.title("データ前処理")
+
+if 'data' not in st.session_state:
+    st.warning("まずホームページでデータを読み込んでください。")
+else:
     df = st.session_state['data'].copy()
-    
+
     st.subheader("欠損値の処理")
     missing_method = st.selectbox("欠損値の処理方法", ["削除", "平均値で補完", "中央値で補完", "線形補間"])
     
@@ -48,6 +46,3 @@ def preprocess_data():
     st.write(df.head())
     
     st.success("データの前処理が完了しました。")
-
-if __name__ == "__main__":
-    preprocess_data()
