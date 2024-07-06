@@ -53,6 +53,7 @@ def modeling():
         
     st.session_state['model'] = model
     st.session_state['model_type'] = model_type
+    st.session_state['model_results'] = results if model_type in ["ARIMA", "SARIMA"] else None
     
     if model_type in ["ARIMA", "SARIMA"]:
         st.subheader("モデルサマリー")
