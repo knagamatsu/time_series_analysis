@@ -1,5 +1,5 @@
 # 時系列データ解析アプリケーション
-- 可視化
+- 前処理・可視化
 ![app_1](./time_series_analysis_1.gif)
 - 予測
 ![app_2](./time_series_analysis_2.gif)
