@@ -61,7 +61,13 @@ def load_data():
     if uploaded_file is not None:
         try:
             if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file)
+                encoding_list = ['utf-8', 'shift-jis', 'cp932']
+                for encoding in encoding_list:
+                    try:
+                        uploaded_file.seek(0)
+                        df = pd.read_csv(uploaded_file, encoding=encoding)
+                    except Exception as e:
+                        print(e)
             else:
                 df = pd.read_excel(uploaded_file)
             
