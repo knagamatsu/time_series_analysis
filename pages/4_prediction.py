@@ -13,9 +13,11 @@ if 'model' not in st.session_state:
 else:
     model = st.session_state['model']
     model_type = st.session_state['model_type']
-    train_df = st.session_state['train_df']  # 訓練データを session_state から取得
+    train_df = st.session_state['train_df']
     test_df = st.session_state['test_df']
     value_column = st.session_state['value_column']
+    
+    fig, ax = plt.subplots(figsize=(12, 6))
     
     if model_type in ["ARIMA", "SARIMA"]:
         results = st.session_state['model_results']
@@ -29,26 +31,12 @@ else:
         forecast_mean = forecast.predicted_mean
         forecast_ci = forecast.conf_int()
         
-        # 予測結果のプロット
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12))
-        
-        # 訓練データのプロット
-        ax1.plot(train_df.index, train_df[value_column], label='訓練データ（実測）')
-        ax1.plot(train_df.index, train_forecast, label='訓練データ（予測）')
-        ax1.set_title("訓練データの予測結果")
-        ax1.legend()
-        
-        # テストデータのプロット
-        ax2.plot(test_df.index, test_df[value_column], label='テストデータ（実測）')
-        ax2.plot(forecast_mean.index, forecast_mean.values, label='テストデータ（予測）')
-        ax2.fill_between(forecast_ci.index, 
-                         forecast_ci.iloc[:, 0], 
-                         forecast_ci.iloc[:, 1], 
-                         alpha=0.3)
-        ax2.set_title("テストデータの予測結果")
-        ax2.legend()
-        
-        st.pyplot(fig)
+        # プロット
+        ax.plot(train_df.index, train_df[value_column], label='訓練データ（実測）', color='blue')
+        ax.plot(train_df.index, train_forecast, label='訓練データ（予測）', color='lightblue')
+        ax.plot(test_df.index, test_df[value_column], label='テストデータ（実測）', color='green')
+        ax.plot(forecast_mean.index, forecast_mean.values, label='テストデータ（予測）', color='lightgreen')
+        ax.fill_between(forecast_ci.index, forecast_ci.iloc[:, 0], forecast_ci.iloc[:, 1], color='lightgreen', alpha=0.3)
         
         forecast_df = pd.DataFrame({
             'actual': test_df[value_column],
@@ -69,41 +57,31 @@ else:
         for regressor in st.session_state['regressors']:
             test_future[regressor] = test_df[regressor].values
         test_forecast = model.predict(test_future)
-        # 予測結果のプロット
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12))
         
-        # 訓練データのプロット
-        ax1.plot(train_df.index, train_df[value_column], label='訓練データ（実測）')
-        ax1.plot(train_forecast['ds'], train_forecast['yhat'], label='訓練データ（予測）')
-        ax1.fill_between(train_forecast['ds'], 
-                         train_forecast['yhat_lower'], 
-                         train_forecast['yhat_upper'], 
-                         alpha=0.3)
-        ax1.set_title("訓練データの予測結果")
-        ax1.legend()
-        
-        # テストデータのプロット
-        ax2.plot(test_df.index, test_df[value_column], label='テストデータ（実測）')
-        ax2.plot(test_forecast['ds'], test_forecast['yhat'], label='テストデータ（予測）')
-        ax2.fill_between(test_forecast['ds'], 
-                         test_forecast['yhat_lower'], 
-                         test_forecast['yhat_upper'], 
-                         alpha=0.3)
-        ax2.set_title("テストデータの予測結果")
-        ax2.legend()
-        
-        st.pyplot(fig)
+        # プロット
+        ax.plot(train_df.index, train_df[value_column], label='訓練データ（実測）', color='blue')
+        ax.plot(train_forecast['ds'], train_forecast['yhat'], label='訓練データ（予測）', color='lightblue')
+        ax.plot(test_df.index, test_df[value_column], label='テストデータ（実測）', color='green')
+        ax.plot(test_forecast['ds'], test_forecast['yhat'], label='テストデータ（予測）', color='lightgreen')
+        ax.fill_between(test_forecast['ds'], test_forecast['yhat_lower'], test_forecast['yhat_upper'], color='lightgreen', alpha=0.3)
         
         forecast_df = pd.DataFrame({
-            'actual': test_df[value_column].values,
-            'predicted': test_forecast['yhat'].values,
-            'lower_ci': test_forecast['yhat_lower'].values,
-            'upper_ci': test_forecast['yhat_upper'].values
+            'actual': test_df[value_column],
+            'predicted': test_forecast['yhat'],
+            'lower_ci': test_forecast['yhat_lower'],
+            'upper_ci': test_forecast['yhat_upper']
         })
+
+    # グラフの設定
+    ax.set_title("訓練データとテストデータの予測結果")
+    ax.legend()
+    ax.axvline(x=test_df.index[0], color='red', linestyle='--', label='訓練/テスト分割点')
+    ax.text(test_df.index[0], ax.get_ylim()[1], '  テスト期間開始', color='red', va='top')
+    
+    st.pyplot(fig)
     
     st.subheader("予測結果データ")
     st.write(forecast_df)
-    forecast_df.dropna(inplace=True)
     
     # 予測精度の評価
     mae = mean_absolute_error(forecast_df['actual'], forecast_df['predicted_mean'] if model_type in ["ARIMA", "SARIMA"] else forecast_df['predicted'])
